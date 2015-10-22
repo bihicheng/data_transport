@@ -11,7 +11,6 @@ $user_operation = $mongo_tool->get_user_operations();
 
 $seconds = intval($argv[1]);
 if($seconds <= 0) $seconds = 10;
-var_dump($seconds);
 
 while(true) {
 	foreach($constants as $constant) {
