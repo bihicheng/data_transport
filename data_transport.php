@@ -16,12 +16,15 @@ if($seconds <= 0) $seconds = 10;
 while(true) {
 	foreach($constants as $constant) {
 		$key = 'user_operation_' . $constant;
-		echo $key . PHP_EOL;
-		echo OperationLogger::count($key) . PHP_EOL;
+		#echo $key . PHP_EOL;
+		#echo OperationLogger::count($key) . PHP_EOL;
 		while(OperationLogger::count($key) > 0) {
 			$val = OperationLogger::pop_record($key);
 			try {
-				$user_operation->insert(json_decode($val));	
+				$data = json_decode($val);
+				$data['time'] = new MongoDate(strtotime($data['time']));
+				$data['urid'] = new MongoId($data['urid']);
+				$user_operation->insert($data);	
 			} catch (Exception $e) {
 				file_put_contents('error.log', $e->getMessage() . PHP_EOL, FILE_APPEND);
 				file_put_contents('transport.log', $val . PHP_EOL , FILE_APPEND);

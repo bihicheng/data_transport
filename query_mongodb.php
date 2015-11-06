@@ -22,6 +22,8 @@ function forloop() {
 	$counter = 10;
 	foreach($cursor as $data) {
 		print_r($data); echo PHP_EOL;
+		$user_operation->update(array('_id'=>$data['_id']), array('$set'=>array('time'=>new MongoDate(strtotime($data['time'])), 
+											'urid'=>new MongoId($data['urid']))));
 		$counter -=1;
 		if($counter == 0) {
 			break;
@@ -52,5 +54,5 @@ function add_user_login_record() {
 function main() {
 	#logcount();
 	#userlogs();
-	forloop();
+	#forloop();
 }
