@@ -8,14 +8,14 @@ class MongodbTool {
 
 	private static $_instance = null;
 	private $client = null;
-	static function getInstance() {
+	static function getInstance($connect_str=null) {
 		if(empty(self::$_instance)) { 
-			self::$_instance = new self();
+			self::$_instance = new self($connect_str);
 		}
 		return self::$_instance;
 	}
 
-	private function __construct($connect_str=null) {
+	public function __construct($connect_str=null) {
 		$options = array();
 		if(empty($connect_str)) {
 			$connect_str = MONGODB_CONNECT_STRING;
@@ -30,9 +30,15 @@ class MongodbTool {
 			die('Failed to connect to MongoDB:' . $e->getMessage());
 		}
 
-		$this->_mugeda_db = $this->client->selectDB(MONGODB_DB_NAME);
-		$this->_mugeda_db->setSlaveOkay();
-		$this->_user_operations = $this->_mugeda_db->selectCollection('user_operations');
+		if($connect_str == MONGODB_CONNECT_STRING) {
+			$this->_mugeda_db = $this->client->selectDB(MONGODB_DB_NAME);
+			$this->_mugeda_db->setSlaveOkay();
+			$this->_user_operations = $this->_mugeda_db->selectCollection('user_operations');
+		} else {
+			$this->_mugeda_db = $this->client->selectDB('mugeda');
+			$this->_mugeda_db->setSlaveOkay();
+			$this->_user_login_logs = $this->_mugeda_db->selectCollection('user_login_logs');
+		}
 	}
 
 	function __clone(){
@@ -49,6 +55,9 @@ class MongodbTool {
 
 	function get_user_operations(){
 		return $this->_user_operations;
+	}
+	function get_user_login_logs(){
+		return $this->_user_login_logs;
 	}
 }
 
