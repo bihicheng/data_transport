@@ -15,19 +15,23 @@ function logcount() {
 	global $cursor;
 	echo $cursor->count() . PHP_EOL;
 }
-
 function forloop() {
 	global $cursor;
 	global $user_operation;
 	$counter = 10;
 	foreach($cursor as $data) {
 		print_r($data); echo PHP_EOL;
+		$counter -= 1;
+		if($counter == 0) break;
+	}
+}
+
+function forloop_update() {
+	global $cursor;
+	global $user_operation;
+	foreach($cursor as $data) {
 		$user_operation->update(array('_id'=>$data['_id']), array('$set'=>array('time'=>new MongoDate(strtotime($data['time'])), 
 											'urid'=>new MongoId($data['urid']))));
-		$counter -=1;
-		if($counter == 0) {
-			break;
-		}
 	}
 }
 
