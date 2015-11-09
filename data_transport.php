@@ -21,7 +21,7 @@ while(true) {
 		while(OperationLogger::count($key) > 0) {
 			$val = OperationLogger::pop_record($key);
 			try {
-				$data = json_decode($val);
+				$data = json_decode($val, true);
 				$data['time'] = new MongoDate(strtotime($data['time']));
 				$data['urid'] = new MongoId($data['urid']);
 				$user_operation->insert($data);	
