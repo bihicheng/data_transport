@@ -1,20 +1,31 @@
 <?php
 
 require_once "mongodb_tool.php";
+require_once "sys_config.php";
 
 $mongo_tool = MongodbTool::getInstance();
 $user_operation = $mongo_tool->get_user_operations();
 $cursor = $user_operation->find()->sort(array('time'=>-1));
 
 
-$site_mongo = new MongodbTool('mongodb://mugeda_prod:niGsq0K0crXIy6y8KHhfgq80bLmAJEs7@10.171.237.164/mugeda');
+$site_mongo = new MongodbTool(SITE_MONGODB_CONNECT_STRING);
 $login_logs = $site_mongo->get_user_login_logs();
-$login_cursor = $login_logs->find();
+$login_cursor = $login_logs->find()->sort(array('time'=>-1));
 
 function logcount() {
 	global $cursor;
 	echo $cursor->count() . PHP_EOL;
 }
+
+function stats_log($cond) {
+	global $user_operation;
+	$cursor = $user_operation->find($cond)->sort(array('time'=>-1));
+	foreach($cursor as $l) {
+		echo date('Y-m-d H:i:s', $l['time']->sec);
+		var_dump($l);break;
+	}
+}
+
 function forloop() {
 	global $cursor;
 	global $user_operation;

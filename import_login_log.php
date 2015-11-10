@@ -26,14 +26,14 @@ $login_cursor = $login_logs->find();
 
 
 function import_user_login_record() {
-	global $user_operation;
+	global $cursor;
 	global $login_logs;
-	$cursor = $user_operation->find(array('type'=>1));
 	foreach($cursor as $login_log) {
 		unset($login_log['message']);
 		unset($login_log['type']);
 		$condition = array('_id'=>$login_log['_id']);
-		if($login_logs->find($condition)->count() > 0){
+		$record_count = $login_logs->find($condition)->count();
+		if($record_count > 0){
 			continue;
 		}
 		$login_logs->insert($login_log);

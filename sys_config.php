@@ -12,3 +12,4 @@ define('REDIS_CONNECT_STRING', 'tcp://10.162.97.232:6379');
 
 // mugeda site mongodb 
 define('SITE_MONGODB_CONNECT_STRING', 'mongodb://mugeda_prod:niGsq0K0crXIy6y8KHhfgq80bLmAJEs7@10.171.237.164/mugeda');
+#define('SITE_MONGODB_CONNECT_STRING', 'mongodb://mugeda_prod:aameiciajieloobidaedohsasiekahta@10.200.16.9/mugeda');
