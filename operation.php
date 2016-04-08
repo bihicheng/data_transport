@@ -5,7 +5,7 @@
  * @Last Modified by:   haicheng
  * @Last Modified time: 2015-10-15 16:26:45
  */
-require_once "redis_tool.php";
+require_once dirname(__FILE__) . "/redis_tool.php";
 
 use Monolog\Logger;
 use Monolog\Handler\RedisHandler;
@@ -23,6 +23,12 @@ class Constants {
 	const USER_DELETE_ASSET = 9;
 	const USER_ADD_SUBACCOUNT = 10;
 	const USER_DELETE_SUBACCOUNT = 11;
+	const USER_NO_ACCESS = 12;
+    const USER_EXTRACT_SHARE_CREATIVE = 13;
+    const USER_VISIT_PRICE_PAGE = 14;
+    const USER_VISIT_SERVICE_PAGE = 15;
+    const USER_VISIT_PAY_PAGE = 16;
+    const USER_VISIT_PAY_RESULT_PAGE = 17;
 
 	static function getContants() {
 		$reflection_class = new ReflectionClass(__CLASS__);
@@ -73,6 +79,15 @@ class OperationLogger {
 		return $val;
 	}
 
+	static function filtered_users($data) {
+		$urid = isset($data['urid']) ? $data['urid'] : null;
+		$black_list = array('5594d7b9cc4e93c8490000da', '51541d2ee8ad7e6b5c000039');
+		if(in_array($urid, $black_list)) {
+			return true;
+		} 
+		return false;
+	}
+
 	static function quit() {
 		$redis_client = RedisTool::getInstance();
 		return $redis_client->quit();
@@ -82,14 +97,24 @@ class OperationLogger {
 	 *  key: channel + type
 	 */
 	static function add_record($type, $data, $channel='user_operation') {
+        error_log(json_encode($data));
 		if(OPERATION_LOGGER_OPEN === true) {
-			$redis_tool = RedisTool::getInstance();
-			$redis_client = $redis_tool->getRedisClient();	
-			$key = sprintf("%s_%s", $channel, $type);
-			$default = array('time'=>date('Y-m-d H:i:s'), 'type'=>$type);
-			$data = array_merge($default, $data);
-			$json_string = json_encode($data, true);
-			return $redis_client->rpush($key, $json_string);	
+			if(self::filtered_users($data) === false) {
+				$redis_tool = RedisTool::getInstance();
+				$redis_client = $redis_tool->getRedisClient();	
+				$key = sprintf("%s_%s", $channel, $type);
+				$default = array('time'=>date('Y-m-d H:i:s'), 'type'=>$type);
+				$data = array_merge($default, $data);
+				$json_string = json_encode($data, true);
+				try{
+					$ret = $redis_client->rpush($key, $json_string);	
+				} catch (Exception $e){
+					$mail_info = include (ROOT_PATH . "logger/mail_config.php");
+					$content = sprintf("[redis error] [%s] %s\n %s\n", date('Y-m-d H:i:s'), $e->getMessage(), json_encode($e->getTrace(), true));
+					SendEmail('', '', $mail_info['subject'], $content, $mail_info['tos']);
+				}
+				return $ret;
+			}
 		}
 	}
 
@@ -137,31 +162,14 @@ class OperationLogger {
 		return self::add_record(Constants::USER_DELETE_SUBACCOUNT, $data);
 	}
 
+	static function add_no_access_record($data) {
+		return self::add_record(Constants::USER_NO_ACCESS, $data);
+	}
+
+    static function add_extract_share_creative($data) {
+        return self::add_record(Constants::USER_EXTRACT_SHARE_CREATIVE, $data);
+    }
+
 }
 
-class Test {
-	function test_delete() {
-		$ret = OperationLogger::delete_key(Constants::USER_LOGIN);
-		return $ret;
-	}
-
-	function test_add_login_record() {
-		$data = array(
-			'urid'=>'asdfasdf21212121212',
-			'message'=>'login ok'
-		);
-		foreach(range(1,100) as $k){
-			OperationLogger::add_login_record($data);
-		}
-	}
-
-	function test_len($key) {
-		return OperationLogger::count($key);
-	}
-
-	function test_get_record_all($key) {
-		return OperationLogger::get_record_all($key);
-	}
-
-}
 
