@@ -20,8 +20,9 @@ while(true) {
 	foreach($constants as $constant) {
 		$key = 'user_operation_' . $constant;
         try {
-		    echo $key, ' => ', OperationLogger::count($key) . PHP_EOL;
-            $exists = OperationLogger::count($key) > 0;
+            $count = OperationLogger::count($key);
+            $exists = $count > 0;
+		    #echo $key, ' => ', $count. PHP_EOL;
         } catch (Exception $e) {
             file_put_contents('logs/error.log', $e->getMessage() . PHP_EOL, FILE_APPEND);
             exit;
