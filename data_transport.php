@@ -20,7 +20,7 @@ while(true) {
 	foreach($constants as $constant) {
 		$key = 'user_operation_' . $constant;
         try {
-		    #echo $key, ' => ', OperationLogger::count($key) . PHP_EOL;
+		    echo $key, ' => ', OperationLogger::count($key) . PHP_EOL;
             $exists = OperationLogger::count($key) > 0;
         } catch (Exception $e) {
             file_put_contents('logs/error.log', $e->getMessage() . PHP_EOL, FILE_APPEND);
@@ -44,7 +44,6 @@ while(true) {
                     }
                 }
                 $options = array('safe' => true);
-                var_dump($data);
 				$user_operation->insert($data, $options);	
 			} catch (Exception $e) {
 				file_put_contents('logs/error.log', $e->getMessage() . PHP_EOL, FILE_APPEND);
