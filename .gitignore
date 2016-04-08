@@ -1,3 +1,4 @@
 
 *.log
 nohup.out
+sys_config.php
